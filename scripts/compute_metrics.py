@@ -1,12 +1,18 @@
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 def compute_performance_metrics():
     print("Calculating system-wide performance and risk metrics...")
-    nav_df = pd.read_csv(r"D:\Programs\bluestock_mf_capstone\data\processed\clean_nav.csv")
-    perf_df = pd.read_csv(r"D:\Programs\bluestock_mf_capstone\data\processed\clean_performance.csv")
+    
+    # 1. Dynamic Path Resolution
+    BASE_DIR = Path(__file__).resolve().parent.parent 
+    PROCESSED_DIR = BASE_DIR / "data" / "processed"
+    
+    nav_df = pd.read_csv(PROCESSED_DIR / "clean_nav.csv")
+    perf_df = pd.read_csv(PROCESSED_DIR / "clean_performance.csv")
 
-    # Sort and establish daily returns
+    # Sorting and establish daily returns
     nav_df['date'] = pd.to_datetime(nav_df['date'])
     nav_df = nav_df.sort_values(['amfi_code', 'date'])
     nav_df['daily_return'] = nav_df.groupby('amfi_code')['nav'].pct_change()
@@ -16,19 +22,23 @@ def compute_performance_metrics():
 
     for amfi, group in nav_df.groupby('amfi_code'):
         returns = group['daily_return'].dropna()
-        if len(returns) < 20:
+        n_trading_days = len(returns)
+        
+        if n_trading_days < 20:
             continue
 
-        # 1. Annualized Return & Volatility
-        avg_daily_return = returns.mean()
-        daily_std = returns.std()
-        ann_return = (1 + avg_daily_return) ** 252 - 1
-        ann_volatility = daily_std * np.sqrt(252)
+        # 2. Correcting Geometric CAGR & Volatility
+        nav_start = group['nav'].iloc[0]
+        nav_end = group['nav'].iloc[-1]
+        
+        # Annualizing using actual trading days observed
+        ann_return = ((nav_end / nav_start) ** (252 / n_trading_days)) - 1 
+        ann_volatility = returns.std() * np.sqrt(252)
 
-        # 2. Sharpe Ratio
+        # 3. Sharpe Ratio
         sharpe = (ann_return - rf_rate) / ann_volatility if ann_volatility > 0 else 0
 
-        # 3. Maximum Drawdown Calculation
+        # 4. Maximum Drawdown Calculation
         nav_series = group['nav'].values
         running_max = np.maximum.accumulate(nav_series)
         drawdowns = (nav_series - running_max) / running_max
@@ -43,8 +53,10 @@ def compute_performance_metrics():
         })
 
     metrics_df = pd.DataFrame(metrics)
-    output_path = r"D:\Programs\bluestock_mf_capstone\data\processed\calculated_performance_metrics.csv"
+    
+    output_path = PROCESSED_DIR / "calculated_performance_metrics.csv"
     metrics_df.to_csv(output_path, index=False)
+    
     print(f"Metrics calculated and exported to {output_path}")
     return metrics_df
 

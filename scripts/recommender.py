@@ -1,58 +1,54 @@
-import sys
+import pandas as pd
+import sqlite3
+from pathlib import Path
 
-def recommend_funds(risk_appetite, data_path):
+def recommend_funds(risk_appetite):
     """
-    Inputs:
-        risk_appetite (str): Must be 'Low', 'Moderate', or 'High'
-        data_path (str): Path to the performance scorecard CSV
-    Output:
-        Pandas DataFrame of the top 3 recommended funds.
+    Recommends top 3 funds based on Sharpe Ratio matching the investor's risk appetite.
+    Inputs: risk_appetite (str): 'Low', 'Moderate', 'High', or 'Very High'
     """
-    try:
-        df = pd.read_csv(data_path)
-    except FileNotFoundError:
-        print(f"Error: Could not find the dataset at {data_path}")
-        return None
+    # Resolves to the project root assuming the notebook is in a subfolder
+    BASE_DIR = Path.cwd().parent
+    DB_PATH = BASE_DIR / 'data' / 'db' / 'bluestock_mf.db'
 
-    risk_appetite = risk_appetite.capitalize()
-    valid_grades = ['Low', 'Moderate', 'High']
+    risk_appetite = risk_appetite.title()
+    valid_grades = ['Low', 'Moderate', 'High', 'Very High']
 
     if risk_appetite not in valid_grades:
-        print(f"Invalid input: '{risk_appetite}'. Please choose from {valid_grades}.")
+        print(f"Invalid input: '{risk_appetite}'. Choose from {valid_grades}.")
         return None
 
-    filtered_funds = df[df['risk_grade'] == risk_appetite].copy()
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        query = """
+            SELECT d.scheme_name, d.category, d.risk_category, 
+                   p.return_3yr_pct, p.sharpe_ratio, d.expense_ratio_pct
+            FROM fact_performance p
+            JOIN dim_fund d ON p.amfi_code = d.amfi_code
+            WHERE d.risk_category = ?
+            ORDER BY p.sharpe_ratio DESC
+            LIMIT 3
+        """
+        top_3_funds = pd.read_sql(query, conn, params=(risk_appetite,))
+        conn.close()
 
-    if filtered_funds.empty:
-        print(f"No funds found for risk appetite: {risk_appetite}")
+        if top_3_funds.empty:
+            print(f"No funds found for risk appetite: {risk_appetite}")
+            return None
+
+        print("\n" + "="*90)
+        print(f"FUND RECOMMENDATION ENGINE: Profile -> {risk_appetite} Risk")
+        print("="*90)
+        print(top_3_funds.to_string(index=False))
+        print("="*90)
+
+        return top_3_funds
+
+    except Exception as e:
+        print(f"Error accessing database: {e}")
         return None
 
-    top_3_funds = filtered_funds.sort_values(by='sharpe_ratio', ascending=False).head(3)
-
-    output_columns = ['scheme_name', 'category', 'risk_grade', '3y_cagr', 'sharpe_ratio', 'expense_ratio_pct']
-
-    actual_columns = [col for col in output_columns if col in top_3_funds.columns]
-
-    if '3y_cagr' not in top_3_funds.columns and 'return_3yr_pct' in top_3_funds.columns:
-        actual_columns = ['scheme_name', 'category', 'risk_grade', 'return_3yr_pct', 'sharpe_ratio', 'expense_ratio_pct']
-
-    top_3_funds = top_3_funds[actual_columns]
-
-    print("\n" + "="*90)
-    print(f"FUND RECOMMENDATION ENGINE: Profile -> {risk_appetite} Risk")
-    print("="*90)
-    print(top_3_funds.to_string(index=False))
-    print("="*90)
-
-    return top_3_funds
-
-# --- Execution Example ---
-file_path = r"D:\Programs\bluestock_mf_capstone\data\processed\clean_performance.csv"
-
-print("Testing the Recommender Engine...")
-
-# Test 1: Conservative Investor
-low_risk_recs = recommend_funds('Low', data_path=file_path)
-
-# Test 2: Aggressive Investor
-high_risk_recs = recommend_funds('High', data_path=file_path)
+if __name__ == "__main__":
+    print("Testing the Recommender Engine...")
+    recommend_funds('Low')
+    recommend_funds('High')
