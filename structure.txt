@@ -1,0 +1,104 @@
+Folder PATH listing for volume New Volume
+Volume serial number is 000000FD 9A59:FEA5
+D:.
+¦   .gitignore
+¦   data_dictionary.md
+¦   requirements.txt
+¦   run_pipeline.py
+¦   structure.txt
+¦   
++---dashboard
+¦       bluestock_mf_dashboard.pbix
+¦       Dashboard.pdf
+¦       
++---data
+¦   ¦   README.md
+¦   ¦   
+¦   +---db
+¦   ¦       bluestock_mf.db
+¦   ¦       
+¦   +---processed
+¦   ¦       alpha_beta.csv
+¦   ¦       cagr_report.csv
+¦   ¦       calculated_performance_metrics.csv
+¦   ¦       clean_aum.csv
+¦   ¦       clean_fund_master.csv
+¦   ¦       clean_nav.csv
+¦   ¦       clean_performance.csv
+¦   ¦       clean_transactions.csv
+¦   ¦       cohort_analysis.csv
+¦   ¦       dim_date.csv
+¦   ¦       fund_scorecard.csv
+¦   ¦       max_drawdown.csv
+¦   ¦       returns_computed.csv
+¦   ¦       sector_hhi.csv
+¦   ¦       sharpe_values.csv
+¦   ¦       sip_continuity.csv
+¦   ¦       sortino_values.csv
+¦   ¦       var_cvar_report.csv
+¦   ¦       
+¦   +---raw
+¦           01_fund_master.csv
+¦           02_nav_history.csv
+¦           03_aum_by_fund_house.csv
+¦           04_monthly_sip_inflows.csv
+¦           05_category_inflows.csv
+¦           06_industry_folio_count.csv
+¦           07_scheme_performance.csv
+¦           08_investor_transactions.csv
+¦           09_portfolio_holdings.csv
+¦           10_benchmark_indices.csv
+¦           nav_118632.csv
+¦           nav_119092.csv
+¦           nav_119551.csv
+¦           nav_120503.csv
+¦           nav_120841.csv
+¦           nav_125497.csv
+¦           
++---notebooks
+¦   ¦   01_data_ingestion.ipynb
+¦   ¦   02_data_cleaning.ipynb
+¦   ¦   03_eda_analysis.ipynb
+¦   ¦   04_performance_analytics.ipynb
+¦   ¦   05_advanced_analytics.ipynb
+¦   ¦   Untitled.ipynb
+¦   ¦   
+¦   +---.ipynb_checkpoints
+¦           01_data_ingestion-checkpoint.ipynb
+¦           02_data_cleaning-checkpoint.ipynb
+¦           03_eda_analysis-checkpoint.ipynb
+¦           04_performance_analytics-checkpoint.ipynb
+¦           05_advanced_analytics-checkpoint.ipynb
+¦           Untitled-checkpoint.ipynb
+¦           
++---reports
+¦       aum_growth.png
+¦       benchmark_chart.png
+¦       category_heatmap.png
+¦       correlation_matrix.png
+¦       demographics.png
+¦       folio_growth.png
+¦       Fund Performance.png
+¦       geo_distribution.png
+¦       Industry Overview.png
+¦       Investor Analytics.png
+¦       Mutual Fund Analytics Platform.pptx
+¦       nav_trend.png
+¦       rolling_sharpe_chart.png
+¦       sector_donut.png
+¦       sector_hhi_chart.png
+¦       SIP & Market Trends.png
+¦       sip_inflow.png
+¦       
++---scripts
+¦       compute_metrics.py
+¦       etl_pipeline.py
+¦       live_nav_fetch.py
+¦       README.md
+¦       recommender.py
+¦       
++---sql
+        queries.sql
+        README.md
+        schema.sql
+        
